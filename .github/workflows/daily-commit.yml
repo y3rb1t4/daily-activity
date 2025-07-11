@@ -1,0 +1,28 @@
+name: Daily Auto Commit
+
+on:
+  schedule:
+    - cron: '0 12 * * *'  # Daily at 12:00 UTC
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  auto-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update activity file
+        run: |
+          echo "Last update: $(date)" > activity.txt
+          echo "Random fact: $(shuf -i 1-1000 -n 1)" >> activity.txt
+          
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Daily activity update - $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git push
